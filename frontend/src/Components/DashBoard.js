@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 import Notifications from './Notifications';
 import Followers from './Followers';
 import Following from './Following';
-import  io  from 'socket.io-client';
+import io from 'socket.io-client';
 import DashBoardPosts from './DashboardPosts';
 import PYMK from './PYMK';
 const socket = io.connect('http://localhost:3001');
@@ -23,16 +23,17 @@ function DashBoard() {
   const [isPopupOpenn, setIsPopupOpenn] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
   useEffect(() => {
+    // Emit newUser event when component mounts or username changes
     socket.emit('newUser', username);
-    console.log(username);
-    window.addEventListener('beforeunload', handleDisconnect);
+
+    // Cleanup function to disconnect socket
     return () => {
-      handleDisconnect();
-      window.removeEventListener('beforeunload', handleDisconnect);
+      socket.disconnect();
     };
-  }, [socket,username]);
+  }, [socket, username]);
 
   useEffect(() => {
+    // Handle socket events related to online users
     socket.on('currentonlineusers', (onlineUser) => {
       setOnlineUsers((prevUsers) => prevUsers.concat(onlineUser.map((user) => user.username)));
     });
@@ -45,19 +46,24 @@ function DashBoard() {
       setOnlineUsers((prevUsers) => prevUsers.filter((user) => user !== offlineUser));
     });
 
+    // Cleanup function to remove socket event listeners
     return () => {
       socket.off('user_online');
       socket.off('user_offline');
       socket.off('currentonlineusers');
     };
-  }, [socket,username]);
+  }, [socket]);
 
-  const handleDisconnect = () => {
-    socket.disconnect();
-  };
+
   useEffect(() => {
     fetchData();
   }, [username]);
+  const logout = async () => {
+    await socket.disconnect();
+    console.log('Hello');
+    navigatetologin();
+  };
+
   const fetchData = (value) => {
     fetch('http://localhost:3001/fetch1')
       .then((response) => response.json())
@@ -94,6 +100,9 @@ function DashBoard() {
   };
   const navigatetoprofile = (state) => {
     navigate('/profile', state);
+  };
+  const navigatetologin = () => {
+    navigate('/');
   };
 
   const openPopup = () => {
@@ -265,6 +274,14 @@ function DashBoard() {
           <DashBoardPosts username={username}></DashBoardPosts>
           <PYMK username={username}></PYMK>
         </div>
+        <button
+          onClick={() => {
+            logout();
+          }}
+          className='bg-sky-800 text-white text-lg p-4 rounded-full'
+        >
+          Logout
+        </button>
       </div>
     </div>
   );

@@ -138,7 +138,7 @@ const PYMK = ({ username }) => {
       {users.map((user, idx) => (
         <div
           key={user.username}
-          className='flex flex-row items-center justify-between rounded-md bg-cyan-800 space-x-2 p-3 m-1'
+          className='flex flex-row items-center justify-between rounded-md bg-cyan-700 space-x-2 p-3 m-1'
         >
           <div className='flex flex-row items-center space-x-2'>
             <img

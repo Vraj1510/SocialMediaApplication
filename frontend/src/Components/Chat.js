@@ -40,59 +40,6 @@ const Chat = ({ username, chats, index, onlineUsers1 }) => {
   const [messagesByDay, setMessagesByDay] = useState(new Map());
   const [typing, setTyping] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState(onlineUsers1);
-  useEffect(() => {
-    socket.emit('newUser', username);
-    console.log(username);
-    window.addEventListener('beforeunload', handleDisconnect);
-    // return () => {
-    //   handleDisconnect();
-    //   window.removeEventListener('beforeunload', handleDisconnect);
-    // };
-  }, [socket,username]);
-
-  useEffect(() => {
-    socket.on('currentonlineusers', (onlineUser) => {
-      setOnlineUsers((prevUsers) => prevUsers.concat(onlineUser.map((user) => user.username)));
-    });
-
-    socket.on('user_online', (onlineUser) => {
-      setOnlineUsers((prevUsers) => [...prevUsers, onlineUser]);
-    });
-
-    socket.on('user_offline', (offlineUser) => {
-      setOnlineUsers((prevUsers) => prevUsers.filter((user) => user !== offlineUser));
-    });
-
-    return () => {
-      socket.off('user_online');
-      socket.off('user_offline');
-      socket.off('currentonlineusers');
-    };
-  }, [socket,username]);
-
-  useEffect(() => {
-    const handleReceiveMessage = (data) => {
-      console.log('received');
-      setMessageReceived(data.message);
-      console.log('received');
-      console.log(index);
-      if (index !== -1) {
-        getTexts(chats[index].id);
-      }
-    };
-    socket.on('receive_message', handleReceiveMessage);
-    return () => {
-      socket.off('receive_message', handleReceiveMessage);
-    };
-  }, [socket, index, chats]);
-  useEffect(() => {
-    if (index !== -1) {
-      getTexts(chats[index].id);
-      setRoom(chats[index].id);
-      joinRoom();
-    }
-  }, [index, chats]);
-
   const handleDisconnect = () => {
     socket.disconnect();
   };
@@ -138,23 +85,23 @@ const Chat = ({ username, chats, index, onlineUsers1 }) => {
     });
     setMessagesByDay(messagesByDay1);
   };
-const handleKeyPress = async (e) => {
-  if (e.key === 'Enter') {
-    console.log(message);
-    console.log(room);
-    // Emit the 'send_message' event with the message and room
-    socket.emit('send_message', {
-      senderName: username,
-      receiverName: chats[index].username,
-      text: message,
-    });
-    console.log(message);
-    // No need to await here since the message will be received via socket.io
-    insertmessage({ user1: username, user2: chats[index].username, message, room });
-    console.log(message);
-    setmessage('');
-  }
-};
+  const handleKeyPress = async (e) => {
+    if (e.key === 'Enter') {
+      console.log(message);
+      console.log(room);
+      // Emit the 'send_message' event with the message and room
+      socket.emit('send_message', {
+        senderName: username,
+        receiverName: chats[index].username,
+        text: message,
+      });
+      console.log(message);
+      // No need to await here since the message will be received via socket.io
+      insertmessage({ user1: username, user2: chats[index].username, message, room });
+      console.log(message);
+      setmessage('');
+    }
+  };
 
   const handleEmojiClick = (event) => {
     console.log(event.emoji);
@@ -203,6 +150,58 @@ const handleKeyPress = async (e) => {
   const handleInputChange = (e) => {
     setmessage(e.target.value);
   };
+  useEffect(() => {
+    socket.emit('newUser', username);
+    console.log(username);
+    window.addEventListener('beforeunload', handleDisconnect);
+    return () => {
+      handleDisconnect();
+      window.removeEventListener('beforeunload', handleDisconnect);
+    };
+  }, [socket, username]);
+
+  useEffect(() => {
+    socket.on('currentonlineusers', (onlineUser) => {
+      setOnlineUsers((prevUsers) => prevUsers.concat(onlineUser.map((user) => user.username)));
+    });
+
+    socket.on('user_online', (onlineUser) => {
+      setOnlineUsers((prevUsers) => [...prevUsers, onlineUser]);
+    });
+
+    socket.on('user_offline', (offlineUser) => {
+      setOnlineUsers((prevUsers) => prevUsers.filter((user) => user !== offlineUser));
+    });
+
+    return () => {
+      socket.off('user_online');
+      socket.off('user_offline');
+      socket.off('currentonlineusers');
+    };
+  }, [socket, username]);
+
+  useEffect(() => {
+    const handleReceiveMessage = (data) => {
+      console.log('received');
+      setMessageReceived(data.message);
+      console.log('received');
+      console.log(index);
+      if (index !== -1) {
+        getTexts(chats[index].id);
+      }
+    };
+    socket.on('receive_message', handleReceiveMessage);
+    return () => {
+      socket.off('receive_message', handleReceiveMessage);
+    };
+  }, [socket, index, chats]);
+  useEffect(() => {
+    if (index !== -1) {
+      getTexts(chats[index].id);
+      setRoom(chats[index].id);
+      joinRoom();
+    }
+  }, [index, chats]);
 
   if (index === -1) {
     return <div className='text-4xl text-white'>Start A Conversation!</div>;
@@ -303,23 +302,6 @@ const handleKeyPress = async (e) => {
               </div>
             );
           })}
-
-          {/* {Array.from(messagesByDay).map(([key, value]) => (
-            <div key={key} className='flex flex-col'>
-              <div className='text-lg text-white'>{key}</div>
-              {value.map((text, index) => (
-                <div
-                  key={index}
-                  className={`rounded p-3 m-2 max-w-[600px] ${
-                    text.user1 === username ? 'bg-white ml-auto' : 'bg-cyan-200'
-                  }`}
-                >
-                  {text.message}
-                </div>
-              ))}
-            </div>
-          ))} */}
-
           {emoji && (
             <EmojiPicker
               width={'400px'}

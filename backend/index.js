@@ -16,55 +16,6 @@ let redisStore = new RedisStore({
 });
 require('dotenv').config();
 const server = require('http').createServer(app);
-// Server-side code
-// const io = new Server(server, {
-//   cors: {
-//     origin: 'http://localhost:3000',
-//     methods:["GET","POST"],
-//   },
-// });
-
-// let onlineUsers = [];
-
-// const addNewUser = (username, socketId) => {
-//   console.log(onlineUsers);
-//   !onlineUsers.some((user) => user.username === username) &&
-//     onlineUsers.push({ username, socketId });
-//   console.log(onlineUsers);
-// };
-// const removeUser = (socketId) => {
-//   onlineUsers = onlineUsers.filter((user) => user.socketId !== socketId);
-// };
-// const getUser = (username) => {
-//   return onlineUsers.find((user) => user.username === username);
-// };
-
-// io.on('connection', (socket) => {
-//   io.emit('currentonlineusers', onlineUsers);
-//   socket.on('newUser', (username) => {
-//     addNewUser(username, socket.id);
-//     console.log(onlineUsers);
-//     io.emit('user_online', username);
-//     io.emit('currentonlineusers', onlineUsers);
-//   });
-//   socket.on('sendText', ({ senderName, receiverName, text }) => {
-//     const receiver = getUser(receiverName);
-//     io.to(receiver.socketId).emit('getText', {
-//       senderName,
-//       text,
-//     });
-//     io.emit('currentonlineusers', onlineUsers);
-//   });
-
-//   socket.on('disconnect', () => {
-//     const user = onlineUsers.find((user) => user.socketId === socket.id);
-//     if (user) {
-//       removeUser(socket.id);
-//       io.emit('user_offline', user.username);
-//     }
-//     io.emit('currentonlineusers', onlineUsers);
-//   });
-// });
 const io = new Server(server, {
   cors: {
     origin: 'http://localhost:3000',
@@ -72,49 +23,88 @@ const io = new Server(server, {
   },
 });
 
-let onlineUsers = [];
-
-const addNewUser = (username, socketId) => {
-  console.log(onlineUsers);
-  // Check if the user is already in the onlineUsers array
-  if (!onlineUsers.some((user) => user.username === username)) {
-    onlineUsers.push({ username, socketId });
-  }
-  console.log(onlineUsers);
-};
-
-const removeUser = (socketId) => {
-  onlineUsers = onlineUsers.filter((user) => user.socketId !== socketId);
-};
-
-const getUser = (username) => {
-  return onlineUsers.find((user) => user.username === username);
-};
-
 io.on('connection', (socket) => {
-  io.emit('currentonlineusers', onlineUsers);
+  let onlineUsers = []; // Declare onlineUsers within the connection event
 
-  socket.on('newUser', (username) => {
-    addNewUser(username, socket.id);
-    console.log(onlineUsers);
-    io.emit('user_online', username);
-    io.emit('currentonlineusers', onlineUsers);
-  });
+  console.log('Connected');
 
-  socket.on('send_message', ({ senderName, receiverName, text }) => {
-    const receiver = getUser(receiverName);
-    if (receiver) {
-      io.to(receiver.socketId).emit('receive_message', { senderName, message: text });
+  const addNewUser = async (username, socketId) => {
+    try {
+      const existingUser = await getUser(username);
+
+      if (existingUser) {
+        console.log('User already exists:', username);
+      } else {
+        await pool.query(
+          `
+          INSERT INTO online (username, socketid)
+          VALUES ($1, $2)
+        `,
+          [username, socketId],
+        );
+        console.log('User added successfully:', username);
+      }
+    } catch (error) {
+      console.error('Error adding user:', error.message);
+      // Handle the error appropriately
+    }
+  };
+
+  const removeUser = async (socketId) => {
+    console.log(socketId);
+    try {
+      await pool.query('DELETE FROM online WHERE socketid=$1', [socketId]);
+      console.log('User removed successfully');
+    } catch (error) {
+      console.error('Error removing user:', error.message);
+      // Handle the error appropriately
+    }
+  };
+
+  const getUser = async (username) => {
+    try {
+      const response = await pool.query('SELECT * FROM online WHERE username=$1', [username]);
+      return response.rows[0];
+    } catch (error) {
+      console.error('Error fetching user:', error.message);
+      // Handle the error appropriately
+    }
+  };
+
+  socket.on('newUser', async (username) => {
+    console.log('new user');
+    try {
+      console.log('New user:', username);
+
+      const existingUser = await getUser(username);
+
+      if (existingUser) {
+        console.log('User already exists:', username);
+      } else {
+        await addNewUser(username, socket.id);
+        console.log('User added successfully:', username);
+        io.emit('user_online', username); // Emit event to notify all clients
+      }
+      // Fetch the latest list of online users after adding the new user
+      const response = await pool.query('SELECT * FROM online');
+      onlineUsers = [...response.rows];
+      io.emit('currentonlineusers', onlineUsers); // Emit event to update all clients with online users
+    } catch (error) {
+      console.error('Error handling new user:', error.message);
     }
   });
 
-  socket.on('disconnect', () => {
-    const user = onlineUsers.find((user) => user.socketId === socket.id);
-    if (user) {
-      removeUser(socket.id);
-      io.emit('user_offline', user.username);
+  socket.on('disconnect', async () => {
+    console.log('Vraj1');
+    try {
+      await removeUser(socket.id);
+      // Fetch the latest list of online users after removing the disconnected user
+      const response = await pool.query('SELECT * FROM online');
+      onlineUsers = [...response.rows];
+      io.emit('currentonlineusers', onlineUsers); // Emit event to update all clients with online users
+    } catch (error) {
+      console.error('Error handling disconnect:', error.message);
     }
-    io.emit('currentonlineusers', onlineUsers);
   });
 });
 
@@ -126,23 +116,22 @@ app.use(
   }),
 );
 app.use(express.json());
-app.use(
-  session({
-    secret: process.env.COOKIE_SECRET,
-    credentials: true,
-    name: 'Vraj',
-    store: redisStore,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.ENVIRONMENT === 'production' ? true : false,
-      httpOnly: true,
-      expires: 1000 * 60 * 60 * 24 * 7,
-      sameSite: process.env.ENVIRONMENT === 'production' ? 'none' : 'lax',
-    },
-  }),
-);
-
+// app.use(
+//   session({
+//     secret: process.env.COOKIE_SECRET,
+//     credentials: true,
+//     name: 'Vraj',
+//     store: redisStore,
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: {
+//       secure: process.env.ENVIRONMENT === 'production' ? true : false,
+//       httpOnly: true,
+//       expires: 1000 * 60 * 60 * 24 * 7,
+//       sameSite: process.env.ENVIRONMENT === 'production' ? 'none' : 'lax',
+//     },
+//   }),
+// );
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -157,9 +146,9 @@ app.post('/handlelogin', async (req, res) => {
       (user) => user.user_name === username && user.password === password,
     );
     if (isValidLogin) {
-      req.session.user = {
-        username: req.body.username,
-      };
+      // req.session.user = {
+      //   username: req.body.username,
+      // };
       return res.json({ message: 'Login successful' });
     } else {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -722,8 +711,8 @@ app.put('/findfriend', async (req, res) => {
       [username],
     );
     const users1 = response1.rows;
-      // console.log(users);
-      // console.log(users1);
+    // console.log(users);
+    // console.log(users1);
     const userNames = users.map((user) => user.user);
     const userNames1 = users1.map((user) => user.user);
 
@@ -731,10 +720,9 @@ app.put('/findfriend', async (req, res) => {
     const subtractedUsers = users.filter((user) => !userNames1.includes(user.user));
     const finalusers = subtractedUsers.map((user1) => ({ user: user1.user }));
 
-
     // console.log(finalusers);
     const usersWithProfileImages = await Promise.all(
-     finalusers.map(async (user) => {
+      finalusers.map(async (user) => {
         const { user: friendUsername } = user;
         const profileImageResponse = await pool.query(
           'SELECT profile FROM user1 WHERE user_name = $1',
@@ -819,14 +807,14 @@ app.post('/addchat', async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 });
-app.put('/fetchchats',async(req,res)=>{
-  try{
-    const {username}=req.body;
+app.put('/fetchchats', async (req, res) => {
+  try {
+    const { username } = req.body;
     const response = await pool.query(
       'SELECT id,user2 as user FROM chats WHERE user1=$1 UNION SELECT id,user1 as user FROM chats WHERE user2=$1',
       [username],
     );
-    const user1=response.rows;
+    const user1 = response.rows;
     // console.log(response.rows);
     const usersWithProfileImages = await Promise.all(
       user1.map(async (row1) => {
@@ -840,46 +828,42 @@ app.put('/fetchchats',async(req,res)=>{
           ? `data:image/png;base64,${profileImageBuffer.toString('base64')}`
           : null;
         return {
-          id:row1.id,
+          id: row1.id,
           username: friendUsername,
           profileImage,
         };
       }),
     );
-      // console.log(usersWithProfileImages);
+    // console.log(usersWithProfileImages);
     res.status(200).json({
       success: true,
       data: usersWithProfileImages,
     });
-  }
-  catch(err)
-  {
+  } catch (err) {
     console.error(err.message);
   }
-})
+});
 app.post('/deletechat', async (req, res) => {
   try {
-    const { user1,user2 } = req.body;
-   const response1 = await pool.query(
-     'DELETE FROM chats WHERE (user1 = $1 AND user2 = $2) OR (user1 = $2 AND user2 = $1)',
-     [user1, user2],
-   );
+    const { user1, user2 } = req.body;
+    const response1 = await pool.query(
+      'DELETE FROM chats WHERE (user1 = $1 AND user2 = $2) OR (user1 = $2 AND user2 = $1)',
+      [user1, user2],
+    );
     res.json({ success: true });
   } catch (err) {
     console.error(err.message);
   }
 });
-app.post('/insertmessage',async(req,res)=>{
-  try{
-    const {user1,user2,message,room,minutes,hours,day,date,month,year,ampm}=req.body;
+app.post('/insertmessage', async (req, res) => {
+  try {
+    const { user1, user2, message, room, minutes, hours, day, date, month, year, ampm } = req.body;
     const response1 = await pool.query(
       'INSERT INTO messages(user1,user2,message,room,minutes,"hour",day,date,month,year,ampm) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)',
       [user1, user2, message, room, minutes, hours, day, date, month, year, ampm],
     );
     res.json({ success: true });
-  }
-  catch(err)
-  {
+  } catch (err) {
     console.error(err.message);
   }
 });
@@ -887,19 +871,16 @@ app.put('/getmessages', async (req, res) => {
   try {
     const { room } = req.body;
     // console.log(room);
-    const response1 = await pool.query(
-      `SELECT * FROM messages WHERE room=$1`,
-      [room],
-    );
-    res.json({ success: true,data:response1.rows });
+    const response1 = await pool.query(`SELECT * FROM messages WHERE room=$1`, [room]);
+    res.json({ success: true, data: response1.rows });
   } catch (err) {
     console.error(err.message);
   }
 });
 app.put('/getrequests', async (req, res) => {
   try {
-    const {username} = req.body;
-    console.log(username);
+    const { username } = req.body;
+    // console.log(username);
     const response1 = await pool.query(`SELECT * FROM requestsent WHERE person1=$1`, [username]);
     res.json({ success: true, data: response1.rows });
   } catch (err) {

@@ -4,7 +4,6 @@ import deletechat from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/sr
 import { useState } from 'react';
 import Chat from './Chat';
 import { useLocation } from 'react-router-dom';
-
 const ChatHome = () => {
   const { state } = useLocation();
   const { username, onlineUsers } = state || {};
@@ -14,7 +13,7 @@ const ChatHome = () => {
   const [explore, setExplore] = useState(false);
   const [list, setList] = useState([]);
   const [index,setIndex]=useState(-1);
-
+  
   const fetchFriendData = async () => {
     try {
       const myHeaders = new Headers();
@@ -227,15 +226,20 @@ const ChatHome = () => {
         </div>
         <input className='h-[45px] w-full rounded-md p-2' placeholder='Find A Chat'></input>
         {chats &&
-          chats.map((chat,idx) => (
+          chats.map((chat, idx) => (
             <div
               className='w-full flex justify-between space-x-3 p-2 items-center flex-row bg-white rounded-sm mt-4 h-[70px]'
               key={chat.username}
-              onClick={()=>{setIndex(idx)}}
+              onClick={() => {
+                setIndex(idx);
+              }}
             >
               <div className='flex flex-row items-center space-x-3'>
                 <img src={chat.profileImage} className='w-[57px] h-[57px] rounded-full'></img>
                 <div className='text-cyan-950 text-xl'>{chat.username}</div>
+                {onlineUsers && onlineUsers.includes(chat.username) && (
+                  <div className='w-3 h-3 bg-green-500 rounded-full'></div>
+                )}
               </div>
               <img
                 src={deletechat}
