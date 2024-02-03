@@ -9,7 +9,7 @@ import OTP from './Components/OTP';
 import ChatHome from './Components/ChatHome';
 function App() {
   return (
-    <div>
+    <div className="app">
       <Routes>
         <Route path='/' element={<Login />} />
         <Route path='/signup' element={<SignUp />} />

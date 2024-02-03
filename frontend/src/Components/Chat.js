@@ -13,8 +13,7 @@ import { Theme } from 'emoji-picker-react';
 import more from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src/Images/more.png';
 import EmojiPicker from 'emoji-picker-react';
 const socket = io.connect('http://localhost:3001');
-const Chat = ({ username, chats, index, onlineUsers1 }) => {
-  // console.log(index);
+const Chat = ({ username, chats, index1, onlineUsers1 }) => {
   const monthdata = [
     'January',
     'February',
@@ -29,7 +28,6 @@ const Chat = ({ username, chats, index, onlineUsers1 }) => {
     'November',
     'December',
   ];
-  console.log(onlineUsers1);
   const daydata = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const inputRef = useRef(null);
   const [emoji, openemoji] = useState(false);
@@ -39,10 +37,11 @@ const Chat = ({ username, chats, index, onlineUsers1 }) => {
   const [room, setRoom] = useState(0);
   const [messagesByDay, setMessagesByDay] = useState(new Map());
   const [typing, setTyping] = useState(false);
+  const [typing1, setTyping1] = useState(false);
+  const [index, setIndex] = useState(-1);
+  console.log(onlineUsers1);
   const [onlineUsers, setOnlineUsers] = useState(onlineUsers1);
-  const handleDisconnect = () => {
-    socket.disconnect();
-  };
+  console.log(onlineUsers);
   const getTexts = async (room) => {
     var myHeaders = new Headers();
     myHeaders.append('Content-Type', 'application/json');
@@ -89,16 +88,9 @@ const Chat = ({ username, chats, index, onlineUsers1 }) => {
     if (e.key === 'Enter') {
       console.log(message);
       console.log(room);
-      // Emit the 'send_message' event with the message and room
-      socket.emit('send_message', {
-        senderName: username,
-        receiverName: chats[index].username,
-        text: message,
-      });
-      console.log(message);
-      // No need to await here since the message will be received via socket.io
       insertmessage({ user1: username, user2: chats[index].username, message, room });
-      console.log(message);
+      socket.connect();
+      socket.emit('send_message');
       setmessage('');
     }
   };
@@ -149,52 +141,60 @@ const Chat = ({ username, chats, index, onlineUsers1 }) => {
   };
   const handleInputChange = (e) => {
     setmessage(e.target.value);
+    if (e.target.value.trim() !== '') {
+      setTyping(true);
+      socket.connect();
+      socket.emit('typing');
+    } else {
+      setTyping(false);
+    }
   };
   useEffect(() => {
+    socket.connect();
     socket.emit('newUser', username);
-    console.log(username);
-    window.addEventListener('beforeunload', handleDisconnect);
-    return () => {
-      handleDisconnect();
-      window.removeEventListener('beforeunload', handleDisconnect);
-    };
-  }, [socket, username]);
+  }, []);
+  useEffect(() => {
+    setOnlineUsers(onlineUsers1);
+    setIndex(index1);
+  }, [onlineUsers1, index1]);
 
   useEffect(() => {
-    socket.on('currentonlineusers', (onlineUser) => {
-      setOnlineUsers((prevUsers) => prevUsers.concat(onlineUser.map((user) => user.username)));
-    });
-
+    socket.connect();
     socket.on('user_online', (onlineUser) => {
-      setOnlineUsers((prevUsers) => [...prevUsers, onlineUser]);
+      setOnlineUsers((prevOnlineUsers) => {
+        const newOnlineUsers = [...new Set([...prevOnlineUsers, onlineUser])];
+        return newOnlineUsers;
+      });
     });
-
     socket.on('user_offline', (offlineUser) => {
-      setOnlineUsers((prevUsers) => prevUsers.filter((user) => user !== offlineUser));
+      setOnlineUsers((prevOnlineUsers) => {
+        const newOnlineUsers = prevOnlineUsers.filter((user) => user !== offlineUser);
+        return newOnlineUsers;
+      });
     });
-
+    socket.on('istyping', () => {
+      setTyping1(true);
+    });
     return () => {
       socket.off('user_online');
       socket.off('user_offline');
-      socket.off('currentonlineusers');
     };
-  }, [socket, username]);
+  }, []);
 
   useEffect(() => {
-    const handleReceiveMessage = (data) => {
-      console.log('received');
-      setMessageReceived(data.message);
+    socket.connect();
+    const handleReceiveMessage = () => {
       console.log('received');
       console.log(index);
       if (index !== -1) {
         getTexts(chats[index].id);
       }
     };
-    socket.on('receive_message', handleReceiveMessage);
+    socket.on('recieve_message', handleReceiveMessage);
     return () => {
-      socket.off('receive_message', handleReceiveMessage);
+      socket.off('recieve_message', handleReceiveMessage);
     };
-  }, [socket, index, chats]);
+  }, [index]);
   useEffect(() => {
     if (index !== -1) {
       getTexts(chats[index].id);
@@ -213,7 +213,11 @@ const Chat = ({ username, chats, index, onlineUsers1 }) => {
           <div className='flex flex-row space-x-3 items-center'>
             <img src={chats[index].profileImage} className='h-[50px] w-[50px] rounded-full'></img>
             <div className='text-3xl'>{chats[index].username}</div>
-            {onlineUsers.includes(chats[index].username) ? <div>Online</div> : null}
+            {typing1 ? (
+              <div>Typing....</div>
+            ) : onlineUsers.some((user) => user.username === chats[index].username) ? (
+              <div>Online</div>
+            ) : null}
           </div>
           <div className='flex flex-row space-x-3 p-3 items-center'>
             <img src={phone} className='h-[30px] w-[30px] rounded-full'></img>

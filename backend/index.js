@@ -8,12 +8,6 @@ const cors = require('cors');
 const session = require('express-session');
 const Redis = require('ioredis');
 const RedisStore = require('connect-redis').default;
-const { createClient } = require('redis');
-let redisClient = createClient();
-redisClient.connect().catch(console.error);
-let redisStore = new RedisStore({
-  client: redisClient,
-});
 require('dotenv').config();
 const server = require('http').createServer(app);
 const io = new Server(server, {
@@ -70,7 +64,12 @@ io.on('connection', (socket) => {
       // Handle the error appropriately
     }
   };
-
+  socket.on('send_message', () => {
+    io.emit('recieve_message');
+  });
+  socket.on('typing', () => {
+    io.emit('istyping');
+  });
   socket.on('newUser', async (username) => {
     console.log('new user');
     try {
@@ -83,12 +82,11 @@ io.on('connection', (socket) => {
       } else {
         await addNewUser(username, socket.id);
         console.log('User added successfully:', username);
-        io.emit('user_online', username); // Emit event to notify all clients
+        // Emit event to notify all clients
       }
-      // Fetch the latest list of online users after adding the new user
       const response = await pool.query('SELECT * FROM online');
       onlineUsers = [...response.rows];
-      io.emit('currentonlineusers', onlineUsers); // Emit event to update all clients with online users
+      io.emit('user_online', onlineUsers); // Emit event to update all clients with online users
     } catch (error) {
       console.error('Error handling new user:', error.message);
     }
@@ -98,10 +96,9 @@ io.on('connection', (socket) => {
     console.log('Vraj1');
     try {
       await removeUser(socket.id);
-      // Fetch the latest list of online users after removing the disconnected user
       const response = await pool.query('SELECT * FROM online');
       onlineUsers = [...response.rows];
-      io.emit('currentonlineusers', onlineUsers); // Emit event to update all clients with online users
+      io.emit('user_offline', onlineUsers); // Emit event to update all clients with online users
     } catch (error) {
       console.error('Error handling disconnect:', error.message);
     }
@@ -138,7 +135,7 @@ const upload = multer({ storage: storage });
 
 app.post('/handlelogin', async (req, res) => {
   try {
-    console.log(req.session);
+    // console.log(req.session);
     const allUsers = await pool.query('SELECT * FROM "user1"');
     const usersData = allUsers.rows;
     const { username, password } = req.body;
@@ -882,6 +879,14 @@ app.put('/getrequests', async (req, res) => {
     const { username } = req.body;
     // console.log(username);
     const response1 = await pool.query(`SELECT * FROM requestsent WHERE person1=$1`, [username]);
+    res.json({ success: true, data: response1.rows });
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+app.put('/getonline', async (req, res) => {
+  try {
+    const response1 = await pool.query(`SELECT * FROM online`);
     res.json({ success: true, data: response1.rows });
   } catch (err) {
     console.error(err.message);

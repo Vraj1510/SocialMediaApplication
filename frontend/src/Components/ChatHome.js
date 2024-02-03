@@ -4,16 +4,38 @@ import deletechat from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/sr
 import { useState } from 'react';
 import Chat from './Chat';
 import { useLocation } from 'react-router-dom';
+import io from 'socket.io-client';
+const socket = io.connect('http://localhost:3001');
 const ChatHome = () => {
   const { state } = useLocation();
-  const { username, onlineUsers } = state || {};
+  const username = state && state.username;
+  const [onlineUsers, setOnlineUsers] = useState([...(state && state.onlineUsers)]);
   const [chats, setChats] = useState([]);
   const [addFriend, setAddFriend] = useState(false);
   const [findAFriend, setFindAFriend] = useState(true);
   const [explore, setExplore] = useState(false);
   const [list, setList] = useState([]);
-  const [index,setIndex]=useState(-1);
-  
+  const [index, setIndex] = useState(-1);
+  useEffect(() => {
+    socket.connect();
+    socket.emit('newUser', username);
+    console.log(onlineUsers);
+  }, []);
+  useEffect(() => {
+    socket.connect();
+    socket.on('user_online', (onlineUser) => {
+      setOnlineUsers([...onlineUser]);
+    });
+
+    socket.on('user_offline', (onlineUser) => {
+      setOnlineUsers([...onlineUser]);
+    });
+    console.log(onlineUsers);
+    return () => {
+      socket.off('user_online');
+      socket.off('user_offline');
+    };
+  }, []);
   const fetchFriendData = async () => {
     try {
       const myHeaders = new Headers();
@@ -103,8 +125,6 @@ const ChatHome = () => {
     }
   };
 
-
-
   const getchats = async () => {
     try {
       var myHeaders = new Headers();
@@ -142,7 +162,6 @@ const ChatHome = () => {
 
     fetchData();
   }, []);
-
 
   return (
     <div className='w-full h-screen bg-cyan-950 flex flex-row'>
@@ -237,7 +256,7 @@ const ChatHome = () => {
               <div className='flex flex-row items-center space-x-3'>
                 <img src={chat.profileImage} className='w-[57px] h-[57px] rounded-full'></img>
                 <div className='text-cyan-950 text-xl'>{chat.username}</div>
-                {onlineUsers && onlineUsers.includes(chat.username) && (
+                {onlineUsers && onlineUsers.some((user) => user.username === chat.username) && (
                   <div className='w-3 h-3 bg-green-500 rounded-full'></div>
                 )}
               </div>
@@ -253,7 +272,7 @@ const ChatHome = () => {
       </div>
       <div className='bg-white w-[2px]'></div>
       <div className='flex w-3/4 items-center justify-around'>
-        <Chat username={username} chats={chats} index={index} onlineUsers1={onlineUsers}></Chat>
+        <Chat username={username} chats={chats} index1={index} onlineUsers1={onlineUsers}></Chat>
       </div>
     </div>
   );

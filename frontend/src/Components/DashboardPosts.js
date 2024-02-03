@@ -50,12 +50,12 @@ const DashBoardPosts = ({ username }) => {
         body: JSON.stringify(body),
       });
       const responseData1 = await response.json();
-      console.log(responseData1);
       const images = responseData1.map((follower) => ({
         person2: follower.person2,
         profile: follower.profile,
       }));
       setFollowing(images);
+      console.log(following);
     } catch (err) {
       console.error(err.message);
     }

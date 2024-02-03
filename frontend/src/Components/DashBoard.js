@@ -11,7 +11,7 @@ import Following from './Following';
 import io from 'socket.io-client';
 import DashBoardPosts from './DashboardPosts';
 import PYMK from './PYMK';
-const socket = io.connect('http://localhost:3001');
+const socket = io.connect('http://localhost:3001', { autoConnect: false });
 function DashBoard() {
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -23,37 +23,25 @@ function DashBoard() {
   const [isPopupOpenn, setIsPopupOpenn] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
   useEffect(() => {
-    // Emit newUser event when component mounts or username changes
+    socket.connect();
     socket.emit('newUser', username);
-
-    // Cleanup function to disconnect socket
-    return () => {
-      socket.disconnect();
-    };
-  }, [socket, username]);
+    console.log(onlineUsers);
+  }, []);
 
   useEffect(() => {
-    // Handle socket events related to online users
-    socket.on('currentonlineusers', (onlineUser) => {
-      setOnlineUsers((prevUsers) => prevUsers.concat(onlineUser.map((user) => user.username)));
-    });
-
+    socket.connect();
     socket.on('user_online', (onlineUser) => {
-      setOnlineUsers((prevUsers) => [...prevUsers, onlineUser]);
+      setOnlineUsers([...onlineUser]);
     });
-
-    socket.on('user_offline', (offlineUser) => {
-      setOnlineUsers((prevUsers) => prevUsers.filter((user) => user !== offlineUser));
+    socket.on('user_offline', (onlineUser) => {
+      setOnlineUsers([...onlineUser]);
     });
-
-    // Cleanup function to remove socket event listeners
+    console.log(onlineUsers);
     return () => {
       socket.off('user_online');
       socket.off('user_offline');
-      socket.off('currentonlineusers');
     };
-  }, [socket]);
-
+  }, [socket, username]);
 
   useEffect(() => {
     fetchData();
