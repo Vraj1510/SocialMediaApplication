@@ -3,8 +3,12 @@ import leftarrow from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src
 import rightarrow from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src/Images/right-arrow.png';
 import comment from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src/Images/comment.png';
 import share from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src/Images/share.png';
+import like from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src/Images/like.png';
+import like1 from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src/Images/like1.png';
+import more from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src/Images/more.png';
 import { useEffect } from 'react';
 import Like from './Like';
+// import
 export const fetchPost = async (following2) => {
   try {
     console.log(following2);
@@ -39,7 +43,7 @@ const DashBoardPosts = ({ username }) => {
   const [comment1, setComment] = useState(false);
   const [posts, setPosts] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState([]);
-  const[following,setFollowing]=useState([]);
+  const [following, setFollowing] = useState([]);
   const userFollowing = async () => {
     try {
       const username1 = username;
@@ -83,9 +87,8 @@ const DashBoardPosts = ({ username }) => {
   };
 
   useEffect(() => {
-
     userFollowing();
-    const fetchData = async () => {
+    async function fetchData() {
       try {
         console.log(following);
         const postsPromises = following.map(async (following1) => await fetchPost(following1));
@@ -94,12 +97,11 @@ const DashBoardPosts = ({ username }) => {
         const filteredArray = allPosts.filter((element) => element !== undefined);
         console.log(filteredArray);
         setPosts(filteredArray.flat());
-        console.log(posts);
         setCurrentImageIndex(new Array(posts.length).fill(0));
       } catch (error) {
         console.error('Error fetching posts:', error.message);
       }
-    };
+    }
     fetchData();
   }, [username]);
   return (
@@ -108,77 +110,134 @@ const DashBoardPosts = ({ username }) => {
         posts.map((post, idx) => {
           console.log(post.pictures);
           return (
+            // <div
+            //   key={idx}
+            //   className='flex flex-row bg-cyan-950 mb-2 w-[70rem] h-[40rem] rounded-lg'
+            // >
+            //   <div className='flex my-5 ml-3 flex w-[6rem] flex-col'>
+            //     <img
+            //       src={`data:image/png;base64,${post.profile}`}
+            //       className='h-[4.4rem] w-[4.4rem] m-1 border-[0.2rem] border-white cursor-pointer overflow-hidden rounded-full'
+            //       alt='Profile'
+            //     />
+            //     <Like id={post.id} username={username}></Like>
+            //     <img
+            //       src={comment}
+            //       onClick={() => setComment(!comment1)}
+            //       className='w-[2.5rem] m-3 mt-12 h-[2.5rem]'
+            //     ></img>
+            //     {comment1 && (
+            //       <div>
+            //         <div className='fixed inset-0 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm bg-black bg-opacity-50'>
+            //           <div className='flex flex-col bg-cyan-950 p-3 w-[71rem] h-[49rem] rounded-lg z-50'>
+            //             <div className='text-4xl text-white'>Comments</div>
+            //             <button
+            //               onClick={() => setComment(!comment1)}
+            //               className='bg-stone-50 h-12 w-1/6 m-3 hover:text-white text-cyan-950 hover:bg-cyan-600 px-2 py-1 mt-3 rounded-md'
+            //             >
+            //               Close
+            //             </button>
+            //           </div>
+            //         </div>
+            //       </div>
+            //     )}
+            //     <img src={share} className='w-[2.5rem] m-3 mt-12 h-[2.5rem]'></img>
+            //   </div>
+            //   <div className='flex w-full h-1/4 flex-col items-start'>
+            //     <div className='flex flex-row mt-3'>
+            //       <div className='text-white mt-7 text-4xl'>{post.person2}</div>
+            //       <textarea
+            //         disabled
+            //         className='w-[53.7rem] h-[4rem] p-2 text-xl bg-white rounded-md ml-10 mt-5'
+            //       >
+            //         {post.caption}
+            //       </textarea>
+            //     </div>
+            //     <div className='flex flex-row'>
+            //       {post.pictures && post.pictures.length > 0 && (
+            //         <div className='flex w-full ml-[1rem] flex-row relative'>
+            //           <img
+            //             src={leftarrow}
+            //             className='h-[2rem] w-[2rem] mt-[15rem] -ml-[2rem] cursor-pointer absolute left-0'
+            //             onClick={() => handlePreviousImage(post.pictures, idx)}
+            //           />
+            //           {post.pictures[currentImageIndex[idx]] && (
+            //             <img
+            //               key={currentImageIndex[idx]}
+            //               src={`data:image/png;base64,${btoa(
+            //                 new Uint8Array(post.pictures[currentImageIndex[idx]].data).reduce(
+            //                   (data, byte) => data + String.fromCharCode(byte),
+            //                   '',
+            //                 ),
+            //               )}`}
+            //               alt={`post Image ${currentImageIndex[idx]}`}
+            //               className='mt-12 h-[29rem] w-[60rem] object-cover'
+            //             />
+            //           )}
+            //           <img
+            //             src={rightarrow}
+            //             className='h-[2rem] w-[2rem] mt-[15rem] -mr-[2rem] cursor-pointer absolute right-0'
+            //             onClick={() => handleNextImage(post.pictures, idx)}
+            //           />
+            //         </div>
+            //       )}
+            //     </div>
+            //   </div>
+            // </div>
             <div
               key={idx}
-              className='flex flex-row bg-cyan-950 mb-2 w-[70rem] h-[40rem] rounded-lg'
+              className='flex flex-col items-center bg-stone-100 m-4 mr-[380px] w-[800px]  rounded-lg flex-1'
             >
-              <div className='flex my-5 ml-3 flex w-[6rem] flex-col'>
-                <img
-                  src={`data:image/png;base64,${post.profile}`}
-                  className='h-[4.4rem] w-[4.4rem] m-1 border-[0.2rem] border-white cursor-pointer overflow-hidden rounded-full'
-                  alt='Profile'
-                />
-                <Like id={post.id} username={username}></Like>
-                <img
-                  src={comment}
-                  onClick={() => setComment(!comment1)}
-                  className='w-[2.5rem] m-3 mt-12 h-[2.5rem]'
-                ></img>
-                {comment1 && (
-                  <div>
-                    <div className='fixed inset-0 flex justify-center items-center z-50 backdrop-filter backdrop-blur-sm bg-black bg-opacity-50'>
-                      <div className='flex flex-col bg-cyan-950 p-3 w-[71rem] h-[49rem] rounded-lg z-50'>
-                        <div className='text-4xl text-white'>Comments</div>
-                        <button
-                          onClick={() => setComment(!comment1)}
-                          className='bg-stone-50 h-12 w-1/6 m-3 hover:text-white text-cyan-950 hover:bg-cyan-600 px-2 py-1 mt-3 rounded-md'
-                        >
-                          Close
-                        </button>
-                      </div>
-                    </div>
+              <div className='flex flex-row w-11/12 m-2 -ml-2 items-center justify-between space-x-4'>
+                <div className='flex flex-row items-center space-x-4'>
+                  <img
+                    src={`data:image/png;base64,${post.profile}`}
+                    className='rounded-full h-16 w-16'
+                  ></img>
+                  <div className='text-3xl text-cyan-950'>{post.person2}</div>
+                </div>
+                <img src={more} className='w-12 h-12 '></img>
+              </div>
+              <div className='h-[2px] w-[730px] mt-1 mb-4 bg-stone-300'></div>
+              <div className='flex flex-col -mt-10'>
+                {post.pictures && post.pictures.length > 0 && (
+                  <div className='flex  flex-row items-center relative'>
+                    <img
+                      src={leftarrow}
+                      className='h-[3.5rem] w-[3.5rem] cursor-pointer z-10 -mr-14 mt-4 rounded-full p-2'
+                      onClick={() => handlePreviousImage(post.pictures, idx)}
+                    />
+                    {post.pictures[currentImageIndex[idx]] && (
+                      <img
+                        key={currentImageIndex[idx]}
+                        src={`data:image/png;base64,${btoa(
+                          new Uint8Array(post.pictures[currentImageIndex[idx]].data).reduce(
+                            (data, byte) => data + String.fromCharCode(byte),
+                            '',
+                          ),
+                        )}`}
+                        alt={`post Image ${currentImageIndex[idx]}`}
+                        className='mt-12 h-[32rem] w-[44rem] rounded-md object-cover'
+                      />
+                    )}
+                    <img
+                      src={rightarrow}
+                      className='h-[3.5rem] w-[3.5rem] cursor-pointer -ml-14 mt-4 rounded-full p-2'
+                      onClick={() => handleNextImage(post.pictures, idx)}
+                    />
                   </div>
                 )}
-                <img src={share} className='w-[2.5rem] m-3 mt-12 h-[2.5rem]'></img>
-              </div>
-              <div className='flex w-full h-1/4 flex-col items-start'>
-                <div className='flex flex-row mt-3'>
-                  <div className='text-white mt-7 text-4xl'>{post.person2}</div>
-                  <textarea
-                    disabled
-                    className='w-[53.7rem] h-[4rem] p-2 text-xl bg-white rounded-md ml-10 mt-5'
-                  >
-                    {post.caption}
-                  </textarea>
-                </div>
-                <div className='flex flex-row'>
-                  {post.pictures && post.pictures.length > 0 && (
-                    <div className='flex w-full ml-[1rem] flex-row relative'>
-                      <img
-                        src={leftarrow}
-                        className='h-[2rem] w-[2rem] mt-[15rem] -ml-[2rem] cursor-pointer absolute left-0'
-                        onClick={() => handlePreviousImage(post.pictures, idx)}
-                      />
-                      {post.pictures[currentImageIndex[idx]] && (
-                        <img
-                          key={currentImageIndex[idx]}
-                          src={`data:image/png;base64,${btoa(
-                            new Uint8Array(post.pictures[currentImageIndex[idx]].data).reduce(
-                              (data, byte) => data + String.fromCharCode(byte),
-                              '',
-                            ),
-                          )}`}
-                          alt={`post Image ${currentImageIndex[idx]}`}
-                          className='mt-12 h-[29rem] w-[60rem] object-cover'
-                        />
-                      )}
-                      <img
-                        src={rightarrow}
-                        className='h-[2rem] w-[2rem] mt-[15rem] -mr-[2rem] cursor-pointer absolute right-0'
-                        onClick={() => handleNextImage(post.pictures, idx)}
-                      />
-                    </div>
-                  )}
+                <div className='flex flex-col w-full mt-2'>
+                  <div className='flex flex-row w-full mt-1'>
+                    <Like id={post.id} username={username}></Like>
+                    <img src={comment} className='h-8 w-8 ml-4'></img>
+                    <img src={share} className='h-7 w-7 ml-4'></img>
+                  </div>
+                  <div className='ml-1 text-2xl mt-0.5'>{0} likes</div>
+                  <div className='flex flex-row space-x-1 pb-4 mt-0.5'>
+                    <div className='text-xl font-bold'>{post.person2}</div>
+                    <div className='text-xl'>{post.caption}</div>
+                  </div>
                 </div>
               </div>
             </div>

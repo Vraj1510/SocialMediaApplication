@@ -5,24 +5,28 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
+import search from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src/Images/search.png';
+import profile from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src/Images/profile3.png';
+import home from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src/Images/home.png';
+import logoImg from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src/Images/logo.jpeg';
 import Notifications from './Notifications';
 import Followers from './Followers';
 import Following from './Following';
 import io from 'socket.io-client';
 import DashBoardPosts from './DashboardPosts';
 import PYMK from './PYMK';
-import Sidebar from './Sidebar';
 const socket = io.connect('http://localhost:3001', { autoConnect: false });
-function DashBoard() {
+function Sidebar({ username }) {
+  // console.log(username);
   const navigate = useNavigate();
   const { state } = useLocation();
-  const username = state && state.username;
   const [input, setInput] = useState('');
   const [list, setList] = useState([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isPopupOpenf, setIsPopupOpenf] = useState(false);
   const [isPopupOpenn, setIsPopupOpenn] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [imageUrl, setImageUrl] = useState([]);
   useEffect(() => {
     socket.connect();
     socket.emit('newUser', username);
@@ -52,7 +56,26 @@ function DashBoard() {
     console.log('Hello');
     navigatetologin();
   };
-
+  const fetchImage = async () => {
+    try {
+      var username1 = username;
+      const body = { username1 };
+      const response = await fetch('http://localhost:3001/fetchImage', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) {
+        console.error('API request failed with status:', response.status);
+        return;
+      }
+      const blob = await response.blob();
+      const imageUrl = URL.createObjectURL(blob);
+      setImageUrl(imageUrl);
+    } catch (err) {
+      console.error('Error fetching image:', err.message);
+    }
+  };
   const fetchData = (value) => {
     fetch('http://localhost:3001/fetch1')
       .then((response) => response.json())
@@ -136,6 +159,9 @@ function DashBoard() {
   const navigatetochat = () => {
     navigate2('/chathome', { state: { username, onlineUsers } });
   };
+  useEffect(() => {
+    fetchImage();
+  }, [username]);
 
   return (
     // <div>
@@ -273,11 +299,121 @@ function DashBoard() {
     //     </button>
     //   </div>
     // </div>
-    <div className='flex flex-row w-screen justify-between'>
-      <Sidebar username={username}></Sidebar>
-      <DashBoardPosts username={username}></DashBoardPosts>
-      <PYMK username={username}></PYMK>
+    <div className='flex flex-col items-center w-[280px] space-y-4 p-4 bg-stone-100 h-[806px] m-3 rounded-lg'>
+      <div className='flex flex-col items-center space-y-2 mb-8'>
+        <img src={imageUrl} className='rounded-full w-[90px] h-[90px]'></img>
+        <div className='flex flex-col text-4xl items-center'>{username}</div>
+      </div>
+      <div className='w-full flex flex-row'>
+        <div className='mt-1'>
+          <div>
+            <img src={profile} className='w-12 h-12 p-1 pr-1 rounded-full'></img>
+            <div className='w-full h-[1.5px] bg-gray-300'></div>
+          </div>
+          <div className='mt-5'>
+            <img src={home} className='w-12 h-12 p-1 pr-1'></img>
+            <div className='w-full h-[1.5px] bg-gray-300'></div>
+          </div>
+          <div className='mt-6'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              viewBox='0 0 24 24'
+              fill='#083344'
+              className='w-11 h-11 bg-stone-100 rounded-full'
+            >
+              <path
+                fillRule='evenodd'
+                d='M5.25 9a6.75 6.75 0 0113.5 0v.75c0 2.123.8 4.057 2.118 5.52a.75.75 0 01-.297 1.206c-1.544.57-3.16.99-4.831 1.243a3.75 3.75 0 11-7.48 0 24.585 24.585 0 01-4.831-1.244.75.75 0 01-.298-1.205A8.217 8.217 0 005.25 9.75V9zm4.502 8.9a2.25 2.25 0 104.496 0 25.057 25.057 0 01-4.496 0z'
+                clipRule='evenodd'
+              />
+            </svg>
+            <div className='w-full h-[1.5px] bg-gray-300'></div>
+          </div>
+          <div className='mt-5'>
+            <img src={followersimg} className='w-12 h-12 p-1 pr-1'></img>
+            <div className='w-full h-[1.5px] bg-gray-300'></div>
+          </div>
+          <div className='mt-5'>
+            <img src={followingimg} className='w-12 h-12 p-1 pr-1 rounded-full'></img>
+            <div className='w-full h-[1.5px] bg-gray-300'></div>
+          </div>
+          <div className='mt-5'>
+            <img src={search} className='w-12 h-12 p-1 pr-1 rounded-full'></img>
+            <div className='w-full h-[1.5px] bg-gray-300'></div>
+          </div>
+          <div className='mt-5'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              viewBox='0 0 24 24'
+              fill='#083344'
+              className='w-12 h-12 p-1 pr-1 '
+              onClick={() => navigatetochat()}
+            >
+              <path
+                fillRule='evenodd'
+                d='M4.804 21.644A6.707 6.707 0 006 21.75a6.721 6.721 0 003.583-1.029c.774.182 1.584.279 2.417.279 5.322 0 9.75-3.97 9.75-9 0-5.03-4.428-9-9.75-9s-9.75 3.97-9.75 9c0 2.409 1.025 4.587 2.674 6.192.232.226.277.428.254.543a3.73 3.73 0 01-.814 1.686.75.75 0 00.44 1.223zM8.25 10.875a1.125 1.125 0 100 2.25 1.125 1.125 0 000-2.25zM10.875 12a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0zm4.875-1.125a1.125 1.125 0 100 2.25 1.125 1.125 0 000-2.25z'
+                clipRule='evenodd'
+              />
+            </svg>
+            <div className='w-full h-[1.5px] bg-gray-300'></div>
+          </div>
+        </div>
+        <div className='flex flex-col w-full text-xl space-y-8'>
+          <div className='flex flex-col space-y-2 mt-4'>
+            <div className='ml-6 hover:underline hover:underline-cyan-800 hover:text-cyan-800 hover:underline-offset-2 cursor-pointer'>
+              Home
+            </div>
+            <div className='w-full h-[1.5px] bg-gray-300'></div>
+          </div>
+          <div className='flex flex-col space-y-2 mt-4'>
+            <div className='ml-6 hover:underline hover:underline-cyan-800 hover:text-cyan-800 hover:underline-offset-2 cursor-pointer'>
+              Profile
+            </div>
+            <div className='w-full h-[1.5px] bg-gray-300'></div>
+          </div>
+          <div className='flex flex-col space-y-2'>
+            <div className='ml-6 hover:underline hover:underline-cyan-800 hover:text-cyan-800 hover:underline-offset-2 cursor-pointer'>
+              Notifications
+            </div>
+            <div className='w-full h-[1.5px] bg-gray-300'></div>
+          </div>
+          <div className='flex flex-col space-y-2'>
+            <div className='ml-6 hover:underline hover:underline-cyan-800 hover:text-cyan-800 hover:underline-offset-2 cursor-pointer'>
+              Followers
+            </div>
+            <div className='w-full h-[1.5px] bg-gray-300'></div>
+          </div>
+          <div className='flex flex-col space-y-2 '>
+            <div className='ml-6 hover:underline hover:underline-cyan-800 hover:text-cyan-800 hover:underline-offset-2 cursor-pointer'>
+              Following
+            </div>
+            <div className='w-full h-[1.5px] bg-gray-300'></div>
+          </div>
+          <div className='flex flex-col space-y-2'>
+            <div className='ml-6 hover:underline hover:underline-cyan-800 hover:text-cyan-800 hover:underline-offset-2 cursor-pointer'>
+              Search
+            </div>
+            <div className='w-full h-[1.5px] bg-gray-300'></div>
+          </div>
+          <div className='flex flex-col space-y-2'>
+            <div className='ml-6 hover:underline hover:underline-cyan-800 hover:text-cyan-800 hover:underline-offset-2 cursor-pointer'>
+              Chat
+            </div>
+            <div className='w-full h-[1.5px] bg-gray-300'></div>
+          </div>
+        </div>
+      </div>
+      <div className='flex flex-col pt-10 -ml-1 w-full items-center'>
+        <button
+          onClick={() => {
+            logout();
+          }}
+          className='bg-cyan-700 text-white text-lg p-4 w-5/6 rounded-xl'
+        >
+          Logout
+        </button>
+      </div>
     </div>
   );
 }
-export default DashBoard;
+export default Sidebar;

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import add1 from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src/Images/Add.png';
-import deletechat from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src/Images/deletechat.png';
+import deletechat from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src/Images/bin1.png';
 import { useState } from 'react';
 import Chat from './Chat';
 import { useLocation } from 'react-router-dom';

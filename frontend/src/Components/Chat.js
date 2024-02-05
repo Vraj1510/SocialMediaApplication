@@ -224,7 +224,7 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
             <img src={zoom} className='h-[40px] w-[40px] rounded-full'></img>
           </div>
         </div>
-        <div className='bg-cyan-950 m-1 h-[700px]'>
+        <div className='bg-cyan-900 p-1 h-[705px]'>
           {/* {console.log(messagesByDay)} */}
           {Array.from(messagesByDay).map(([key, value]) => {
             const arr1 = key.split('-');
@@ -284,7 +284,7 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                     <div key={index} className='flex flex-row items-center mr-2 justify-between'>
                       <div
                         className={`rounded p-3 m-2 mr-12 text-lg max-w-[600px] ${
-                          isCurrentUser ? 'bg-white ml-auto' : 'bg-cyan-200'
+                          isCurrentUser ? 'bg-white ml-auto' : 'bg-cyan-100'
                         }`}
                       >
                         {text.message}
@@ -295,7 +295,7 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
                           <div className='text-sm text-gray-500 w-16 mb-1'>{time}</div>
                         </div>
                       ) : (
-                        <div className='flex flex-col items-end -ml-14 mr-auto h-[52px] w-[80px] rounded justify-between bg-cyan-200'>
+                        <div className='flex flex-col items-end -ml-14 mr-auto h-[52px] w-[80px] rounded justify-between bg-cyan-100'>
                           <img src={more} className='w-7 h-7 -mt-0.5' alt='more'></img>
                           <div className='text-sm text-gray-500 w-16 mb-1'>{time}</div>
                         </div>
@@ -315,7 +315,7 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
             ></EmojiPicker>
           )}
         </div>
-        <div className='flex items-center bg-white w-full h-[60px] p-2'>
+        <div className='flex items-center bg-white w-full h-[65px] p-2'>
           <RoundedBtn
             onClick={() => {
               openemoji(!emoji);
@@ -328,7 +328,7 @@ const Chat = ({ username, chats, index1, onlineUsers1 }) => {
           <input
             type='text'
             placeholder='Type a message'
-            className='bg-cyan-900 rounded-lg outline-none text-lg text-neutral-200 w-[1200px] h-[50px] px-3 placeholder:text-lg placeholder:text-[#8796a1]'
+            className='bg-cyan-950 rounded-lg outline-none text-lg text-neutral-200 w-[1200px] h-[55px] px-3 placeholder:text-lg placeholder:text-stone-300'
             style={{ fontSize: '1.5em' }} // Adjust the '2em' value based on your preference
             onChange={handleInputChange}
             onKeyDown={handleKeyPress}

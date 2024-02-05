@@ -56,7 +56,7 @@ function Like({ id, username }) {
     <img
       onClick={likePostHandle}
       src={liked ? like1 : like}
-      className='w-[2.5rem] m-3 mt-14 h-[2.5rem]'
+      className='w-[2rem] h-[2rem]'
       alt='Like Icon'
     />
   );

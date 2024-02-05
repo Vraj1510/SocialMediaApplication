@@ -61,20 +61,22 @@ function Login() {
     }
   };
   return (
-    <div className='flex w-screen h-screen bg-cyan-950 flex justify-center items-center'>
-      <div className='w-1/3 h-2/3 items-center bg-stone-50 flex flex-col justify-center items-center rounded-lg'>
+    <div className='flex w-screen h-screen bg-stone-50 flex justify-center items-center'>
+      <div className='w-1/3 h-2/3 border-[2px] shadow-lg items-center bg-stone-100 flex flex-col justify-center items-center rounded-lg'>
         <img src={logoImg} className='h-1/3 w-1/3 pb-10 rounded-full' alt='Image Description' />
-        <input
-          className='mb-8 w-2/3 h-10 border-2 text-white border-transparent bg-cyan-950 placeholder-slate-200 outline-none !important cursor-pointer p-2'
-          type='text'
-          placeholder='Username....'
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <div className='flex w-2/3'>
+        <div className='flex w-3/4 shadow-sm border-[2px] mb-8 h-12 bg-stone-50'>
           <input
-            className='mb-8 w-full h-10 border-2 text-white border-transparent bg-cyan-950 placeholder-slate-200 outline-none !important cursor-pointer p-2'
+            className='mb-8 w-2/3 h-10 mt-0.5 text-stone-950 text-lg border-transparent bg-stone-50 placeholder-stone-700 outline-none !important cursor-pointer p-2'
+            type='text'
+            placeholder='Username....'
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
+        <div className='flex w-3/4 shadow-sm justify-between border-[2px] mb-16 h-12 bg-stone-50'>
+          <input
+            className='mb-8 w-2/3 h-10 mt-0.5 text-stone-950 text-lg border-transparent bg-stone-50 placeholder-stone-700 outline-none !important cursor-pointer p-2'
             type={showPassword ? 'text' : 'password'}
             placeholder='Password....'
             value={password}
@@ -84,18 +86,18 @@ function Login() {
           <img
             onClick={handleImageClick}
             src={showPassword ? visible : hidden}
-            className='bg-cyan-950 p-2 h-10 w-10'
+            className='bg-cyan-950 p-2 h-11.5 w-11'
           ></img>
         </div>
         <button
           onClick={handleLogin}
-          className='h-10 w-1/3 bg-cyan-950 text-stone-50 text-lg mb-6 bg-cyan-950 placeholder-white rounded-xl hover:bg-cyan-600 hover:text-stone-50 font-semibold hover:font-semibold'
+          className='h-10 w-1/3 bg-cyan-950 text-stone-50 text-lg mb-4 bg-cyan-950 placeholder-white rounded-xl hover:bg-cyan-600 hover:text-stone-50 font-semibold hover:font-semibold'
         >
           Login
         </button>
-        <p className='text-left text-cyan-950 font-semibold text-lg'>
+        <p className='text-left font-medium text-lg'>
           Create An Account?{' '}
-          <Link to='/signup' className='hover:text-cyan-600'>
+          <Link to='/signup' className='text-cyan-800 hover:underline hover:underline-offset-2'>
             SignUp
           </Link>
         </p>

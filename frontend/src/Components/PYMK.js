@@ -133,12 +133,12 @@ const PYMK = ({ username }) => {
   }, [users]);
 
   return (
-    <div className='flex flex-col p-4 mt-16 mr-5 rounded-lg bg-cyan-950'>
-      <div className='text-white text-2xl mb-5 m-4 bg-cyan-950'>People You May Know</div>
+    <div className='flex flex-col absolute right-0 items-center w-76 space-y-6 p-3 bg-stone-100 h-[808px] m-3 rounded-lg'>
+      <div className='text-cyan-950 text-3xl mb-5 m-4 bg-stone-100'>Find Friends</div>
       {users.map((user, idx) => (
         <div
           key={user.username}
-          className='flex flex-row items-center justify-between rounded-md bg-cyan-700 space-x-2 p-3 m-1'
+          className='flex w-full flex-row items-center justify-between rounded-md bg-stone-50 shadow-md border-[2px] space-x-2 p-3 m-1'
         >
           <div className='flex flex-row items-center space-x-2'>
             <img
@@ -146,17 +146,17 @@ const PYMK = ({ username }) => {
               className='h-12 w-12 rounded-full'
               alt={user.username}
             ></img>
-            <div className='text-white text-lg'>{user.username}</div>
+            <div className='text-cyan-950 text-lg'>{user.username}</div>
           </div>
           <button
             onClick={() => {
               requestsent1(user.username, idx);
             }}
-            className={`font-md text-lg p-2 rounded-lg mr-8 h-[2.7rem] ${
-              bool1[idx] ? 'text-black bg-white' : 'bg-cyan-600 text-white'
+            className={`text-md p-2 rounded-lg w-[100px] mr-8 h-[2.7rem] ${
+              bool1[idx] ? 'text-cyan-900 bg-cyan-200' : 'bg-cyan-600 text-white'
             }`}
           >
-            {bool1[idx] ? 'Request Sent' : 'Follow'}
+            {bool1[idx] ? 'Requested' : 'Follow'}
           </button>
         </div>
       ))}

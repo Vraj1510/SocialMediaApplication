@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import visible from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src/Images/visible.png';
+import hidden from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src/Images/hidden.png';
 import logoImg from '/Users/vrajshah1510/Documents/SOCIALMEDIAAPP/frontend/src/Images/logo.jpeg';
 import { useNavigate } from 'react-router-dom';
 function SignUp() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const handleImageClick = () => {
+    setShowPassword(!showPassword);
+  };
   var bool1 = true;
   // const fs = require('fs');
   // const fetch = require('node-fetch');
@@ -88,26 +94,34 @@ function SignUp() {
   };
 
   return (
-    <div className='flex w-screen h-screen bg-cyan-950 flex justify-center items-center'>
-      <div className='w-1/3 h-2/3 items-center bg-slate-50 flex flex-col justify-center items-center rounded-xl'>
+    <div className='flex w-screen h-screen bg-stone-50 flex justify-center items-center'>
+      <div className='w-1/3 h-2/3 border-[2px] shadow-lg items-center bg-stone-100 flex flex-col justify-center items-center rounded-lg'>
         <img src={logoImg} className='rounded-full h-1/3 w-1/3 pb-10' alt='Image Description' />
         <input
-          className='text-white mb-8 w-2/3 h-10 placeholder-white font-border-2 rounded-md border-transparent bg-cyan-950 hover:border-cyan-500 focus:border-cyan-500 !important cursor-pointer p-2'
+          className='mb-6 w-2/3 h-12 mt-0.5 text-lg shadow-sm border-[2px] text-stone-950 bg-stone-50 placeholder-stone-700 outline-none !important cursor-pointer p-2'
           type='text'
           id='user_name'
           placeholder='Username....'
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
+        <div className='flex w-2/3 shadow-sm justify-between border-[2px] mb-6 h-12 bg-stone-50'>
+          <input
+            className='mb-8 w-2/3 h-10 mt-0.5 text-stone-950 text-lg border-transparent bg-stone-50 placeholder-stone-700 outline-none !important cursor-pointer p-2'
+            type={showPassword ? 'text' : 'password'}
+            placeholder='Password....'
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <img
+            onClick={handleImageClick}
+            src={showPassword ? visible : hidden}
+            className='bg-cyan-950 p-2 h-11.5 w-11'
+          ></img>
+        </div>
         <input
-          className='text-white mb-8 w-2/3 h-10 placeholder-white border-2 rounded-md border-transparent bg-cyan-950 hover:border-cyan-500 focus:border-cyan-500 !important cursor-pointer p-2'
-          type='password'
-          placeholder='Password....'
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <input
-          className='text-white mb-8 w-2/3 h-10 placeholder-white border-2 rounded-md border-transparent bg-cyan-950 hover:border-cyan-500 focus:border-cyan-500 !important cursor-pointer p-2'
+          className='mb-6 w-2/3 h-12 mt-0.5 text-lg shadow-sm border-[2px] text-stone-950  bg-stone-50 placeholder-stone-700 outline-none !important cursor-pointer p-2'
           type='text'
           placeholder='Phone....'
           value={phone}
@@ -115,13 +129,13 @@ function SignUp() {
         />
         <button
           onClick={handleSignUp}
-          className='h-10 w-1/3 bg-cyan-950 text-white text-lg mb-6 rounded-xl hover:bg-cyan-600 font-semibold hover:font-semibold'
+          className='h-10 w-1/3 bg-cyan-950 shadow-sm border-[2px] text-white text-lg mb-2 mt-4 rounded-xl hover:bg-cyan-600 font-semibold hover:font-semibold'
         >
           SignUp
         </button>
-        <p className='text-left text-cyan-900 text-lg font-semibold'>
+        <p className='text-left font-medium text-lg'>
           Already Have An Account?{' '}
-          <Link to='/' className='hover:text-cyan-600'>
+          <Link to='/' className='text-cyan-800 hover:underline hover:underline-offset-2'>
             Login
           </Link>
         </p>
